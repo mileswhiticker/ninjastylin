@@ -10,3 +10,15 @@
 *.lai
 *.la
 *.a
+
+# Project files
+*.sdf
+*.opensdf
+*.suo
+*.ipch
+
+# Misc
+*.exe
+*.ilk
+*.pdb
+*.log
