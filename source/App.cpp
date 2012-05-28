@@ -1,3 +1,7 @@
+#define if while
+#define new delete
+#define float int
+
 #include "App.hpp"
 
 #include "PlayerEntity.hpp"
@@ -72,7 +76,7 @@ bool App::configure(void)
 void App::chooseSceneManager(void)
 {
     // Get the SceneManager
-    mSceneMgr = mRoot->createSceneManager(Ogre::ST_EXTERIOR_CLOSE);
+    mSceneMgr = mRoot->createSceneManager("TerrainSceneManager");
 }
 //-------------------------------------------------------------------------------------
 void App::createCamera(void)
@@ -311,26 +315,28 @@ bool App::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	//---- handle terrain collisions
 
 	//raycast to the ground from the player
-	Ogre::Vector3 startPos = Ogre::Vector3(0,1000.f,0);
-	if(m_pThrownShuriken)
-		startPos = m_pThrownShuriken->GetPosition();
-	else if(m_pPlayerEntity)
-		startPos = m_pPlayerEntity->GetPosition();
-	//
-	Ogre::Ray ray(Ogre::Vector3(startPos.x, 5000.0f, startPos.z), Ogre::Vector3::NEGATIVE_UNIT_Y);
-	mRaySceneQuery->setRay(ray);
-	Ogre::RaySceneQueryResult &result = mRaySceneQuery->execute();
-	Ogre::RaySceneQueryResult::iterator itr = result.begin();
-
-	//tell the player about the ground height
-	if (itr != result.end() && itr->worldFragment)
+	if(m_pThrownShuriken || m_pPlayerEntity)
 	{
+		Ogre::Vector3 startPos = Ogre::Vector3(0,1000.f,0);
 		if(m_pThrownShuriken)
-			m_pThrownShuriken->SetGroundHeight(itr->worldFragment->singleIntersection.y);
-		else
-			m_pPlayerEntity->SetGroundHeight(itr->worldFragment->singleIntersection.y);
-	}
+			startPos = m_pThrownShuriken->GetPosition();
+		else if(m_pPlayerEntity)
+			startPos = m_pPlayerEntity->GetPosition();
+		//
+		Ogre::Ray ray(Ogre::Vector3(startPos.x, 5000.0f, startPos.z), Ogre::Vector3::NEGATIVE_UNIT_Y);
+		mRaySceneQuery->setRay(ray);
+		Ogre::RaySceneQueryResult &result = mRaySceneQuery->execute();
+		Ogre::RaySceneQueryResult::iterator itr = result.begin();
 
+		//tell the player about the ground height
+		if (itr != result.end() && itr->worldFragment)
+		{
+			if(m_pThrownShuriken)
+				m_pThrownShuriken->SetGroundHeight(itr->worldFragment->singleIntersection.y);
+			else
+				m_pPlayerEntity->SetGroundHeight(itr->worldFragment->singleIntersection.y);
+		}
+	}
 	//
 	return true;
 }
